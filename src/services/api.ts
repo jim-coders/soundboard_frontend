@@ -60,6 +60,12 @@ interface UserResponse {
   };
 }
 
+interface UploadUrlResponse {
+  url: string;
+  key: string;
+  bucketName: string;
+}
+
 export const auth = {
   login: async (
     email: string,
@@ -118,15 +124,50 @@ export const soundboard = {
       throw handleApiError(error);
     }
   },
-  uploadSound: async (file: File) => {
+  getSoundUrl: async (id: string) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const response = await api.post('/sounds', formData, {
+      const response = await api.get(`/sounds/${id}/url`);
+      return response.data.url;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+  uploadSound: async (
+    file: File,
+    title: string,
+    description: string
+  ) => {
+    try {
+      // First get the pre-signed URL
+      const { data } = await api.get<UploadUrlResponse>(
+        '/sounds/upload-url',
+        {
+          params: {
+            fileType: file.type,
+            fileName: file.name,
+          },
+        }
+      );
+
+      // Upload directly to S3 using the pre-signed URL
+      await axios.put(data.url, file, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': file.type,
         },
       });
+
+      // Create the sound record in our database
+      const response = await api.post('/sounds', {
+        title,
+        description,
+        metadata: {
+          s3Key: data.key,
+          bucketName: data.bucketName,
+          fileType: file.type,
+          fileSize: file.size,
+        },
+      });
+
       return response.data;
     } catch (error) {
       throw handleApiError(error);

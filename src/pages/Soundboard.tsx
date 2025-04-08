@@ -11,6 +11,15 @@ import {
   IconButton,
   HStack,
   Text,
+  FormControl,
+  FormLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { soundboard, auth } from '../services/api';
@@ -35,6 +44,10 @@ interface Sound {
 const Soundboard = () => {
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -66,15 +79,32 @@ const Soundboard = () => {
     loadSounds();
   }, [navigate, loadSounds]);
 
-  const handleFileUpload = async (
+  const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) {
+      setSelectedFile(file);
+      setTitle(file.name.split('.')[0]); // Set default title from filename
+      onOpen();
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !title) {
+      toast({
+        title: 'Error',
+        description: 'Please provide a title and select a file',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
 
     setIsUploading(true);
     try {
-      await soundboard.uploadSound(file);
+      await soundboard.uploadSound(selectedFile, title, description);
       await loadSounds();
       toast({
         title: 'Sound uploaded successfully',
@@ -82,6 +112,10 @@ const Soundboard = () => {
         duration: 3000,
         isClosable: true,
       });
+      onClose();
+      setSelectedFile(null);
+      setTitle('');
+      setDescription('');
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Upload failed';
@@ -146,7 +180,7 @@ const Soundboard = () => {
         <Input
           type="file"
           accept="audio/*"
-          onChange={handleFileUpload}
+          onChange={handleFileSelect}
           display="none"
           id="file-upload"
         />
@@ -161,6 +195,42 @@ const Soundboard = () => {
             Upload Sound
           </Button>
         </label>
+
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Upload Sound</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody pb={6}>
+              <VStack spacing={4}>
+                <FormControl isRequired>
+                  <FormLabel>Title</FormLabel>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter sound title"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Description</FormLabel>
+                  <Input
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter sound description (optional)"
+                  />
+                </FormControl>
+                <Button
+                  colorScheme="blue"
+                  onClick={handleUpload}
+                  isLoading={isUploading}
+                  width="100%"
+                >
+                  Upload
+                </Button>
+              </VStack>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
 
         <Grid
           templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
@@ -183,11 +253,38 @@ const Soundboard = () => {
                 )}
                 <Button
                   width="100%"
-                  onClick={() =>
-                    new Audio(
-                      `http://localhost:4000/sounds/${sound._id}`
-                    ).play()
-                  }
+                  onClick={async () => {
+                    try {
+                      const url = await soundboard.getSoundUrl(
+                        sound._id
+                      );
+                      const audio = new Audio(url);
+                      audio.onerror = (e) => {
+                        console.error('Audio error:', e);
+                        toast({
+                          title: 'Error playing sound',
+                          description:
+                            'Could not load the audio file. Please check the console for details.',
+                          status: 'error',
+                          duration: 5000,
+                          isClosable: true,
+                        });
+                      };
+                      await audio.play();
+                    } catch (error) {
+                      console.error('Play error:', error);
+                      toast({
+                        title: 'Error playing sound',
+                        description:
+                          error instanceof Error
+                            ? error.message
+                            : 'Failed to play sound',
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                      });
+                    }
+                  }}
                 >
                   Play Sound
                 </Button>
