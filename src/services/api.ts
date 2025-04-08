@@ -2,6 +2,18 @@ import axios, { AxiosError } from 'axios';
 
 const API_URL = 'http://localhost:4000';
 
+// Custom error class for API errors
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status?: number,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -13,30 +25,69 @@ const api = axios.create({
 // Handle unauthorized responses
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('userData');
       window.location.href = '/login';
+      throw new ApiError(
+        'Session expired. Please log in again.',
+        401
+      );
     }
-    return Promise.reject(error);
+
+    if (error.response?.status === 403) {
+      throw new ApiError(
+        'You do not have permission to perform this action.',
+        403
+      );
+    }
+
+    if (error.response?.status === 404) {
+      throw new ApiError(
+        'The requested resource was not found.',
+        404
+      );
+    }
+
+    if (error.response?.status === 500) {
+      throw new ApiError(
+        'An unexpected server error occurred. Please try again later.',
+        500
+      );
+    }
+
+    throw error;
   }
 );
 
 // Error handling helper
 const handleApiError = (error: unknown) => {
+  if (error instanceof ApiError) {
+    throw error;
+  }
+
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{
       message?: string;
       error?: string;
+      code?: string;
     }>;
-    const errorMessage =
+
+    const status = axiosError.response?.status;
+    const message =
       axiosError.response?.data?.message ||
       axiosError.response?.data?.error ||
       axiosError.message ||
       'An unexpected error occurred';
-    throw new Error(errorMessage);
+
+    throw new ApiError(
+      message,
+      status,
+      axiosError.response?.data?.code
+    );
   }
-  throw error;
+
+  throw new ApiError('An unexpected error occurred');
 };
 
 interface UserResponse {
