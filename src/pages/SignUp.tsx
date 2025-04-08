@@ -83,14 +83,17 @@ const SignUp = () => {
 
     try {
       await auth.signup(username, email, password);
+
       toast({
         title: 'Account created',
-        description: 'Please login with your new account',
+        description: 'Welcome to Soundboard!',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      navigate('/login');
+
+      // Redirect to soundboard page
+      navigate('/soundboard', { replace: true });
     } catch (error) {
       const errorMessage =
         error instanceof Error

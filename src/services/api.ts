@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // This is important for cookies
 });
 
 // Add token to requests if it exists
@@ -49,14 +50,11 @@ const handleApiError = (error: unknown) => {
 
 interface UserResponse {
   user: {
-    user: {
-      _id: string;
-      username: string;
-      email: string;
-      favorites: string[];
-      createdAt: string;
-    };
-    token: string;
+    _id: string;
+    username: string;
+    email: string;
+    favorites: string[];
+    createdAt: string;
   };
 }
 
@@ -76,6 +74,11 @@ export const auth = {
         email,
         password,
       });
+      // Store user data in localStorage (not sensitive)
+      localStorage.setItem(
+        'userData',
+        JSON.stringify(response.data.user)
+      );
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -92,6 +95,11 @@ export const auth = {
         email,
         password,
       });
+      // Store user data in localStorage (not sensitive)
+      localStorage.setItem(
+        'userData',
+        JSON.stringify(response.data.user)
+      );
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -102,15 +110,19 @@ export const auth = {
     if (!userData) return null;
 
     try {
-      const user = JSON.parse(userData);
-      return {
-        username: user.username,
-        email: user.email,
-      };
+      return JSON.parse(userData);
     } catch (error) {
       console.error('Error parsing user data:', error);
       localStorage.removeItem('userData');
       return null;
+    }
+  },
+  logout: async () => {
+    try {
+      await api.post('/users/logout');
+      localStorage.removeItem('userData');
+    } catch (error) {
+      throw handleApiError(error);
     }
   },
 };
