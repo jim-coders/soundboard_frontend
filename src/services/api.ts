@@ -192,6 +192,49 @@ export const soundboard = {
     description: string
   ) => {
     try {
+      // Validate file type
+      if (!file.type.startsWith('audio/')) {
+        throw new ApiError(
+          'Please upload an audio file',
+          400,
+          'INVALID_FILE_TYPE'
+        );
+      }
+
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new ApiError(
+          'File size must be less than 10MB',
+          400,
+          'FILE_TOO_LARGE'
+        );
+      }
+
+      // Validate title and description
+      if (!title.trim() || !description.trim()) {
+        throw new ApiError(
+          'Title and description are required',
+          400,
+          'MISSING_FIELDS'
+        );
+      }
+
+      if (title.length > 100) {
+        throw new ApiError(
+          'Title must be less than 100 characters',
+          400,
+          'TITLE_TOO_LONG'
+        );
+      }
+
+      if (description.length > 500) {
+        throw new ApiError(
+          'Description must be less than 500 characters',
+          400,
+          'DESCRIPTION_TOO_LONG'
+        );
+      }
+
       // First get the pre-signed URL
       const { data } = await api.get<UploadUrlResponse>(
         '/sounds/upload-url',
