@@ -27,11 +27,8 @@ const Login = () => {
 
     try {
       const response = await auth.login(email, password);
-      localStorage.setItem('token', response.user.token);
-      localStorage.setItem(
-        'userData',
-        JSON.stringify(response.user.user)
-      );
+      console.log({ response });
+      localStorage.setItem('token', response.token);
 
       toast({
         title: 'Login successful',

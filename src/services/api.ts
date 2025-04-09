@@ -2,18 +2,6 @@ import axios, { AxiosError } from 'axios';
 
 const API_URL = 'http://localhost:4000';
 
-// Custom error class for API errors
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public code?: string
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
-
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -22,72 +10,42 @@ const api = axios.create({
   withCredentials: true, // This is important for cookies
 });
 
+// Add token to requests if it exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Handle unauthorized responses
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
       window.location.href = '/login';
-      throw new ApiError(
-        'Session expired. Please log in again.',
-        401
-      );
     }
-
-    if (error.response?.status === 403) {
-      throw new ApiError(
-        'You do not have permission to perform this action.',
-        403
-      );
-    }
-
-    if (error.response?.status === 404) {
-      throw new ApiError(
-        'The requested resource was not found.',
-        404
-      );
-    }
-
-    if (error.response?.status === 500) {
-      throw new ApiError(
-        'An unexpected server error occurred. Please try again later.',
-        500
-      );
-    }
-
-    throw error;
+    return Promise.reject(error);
   }
 );
 
 // Error handling helper
 const handleApiError = (error: unknown) => {
-  if (error instanceof ApiError) {
-    throw error;
-  }
-
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{
       message?: string;
       error?: string;
-      code?: string;
     }>;
-
-    const status = axiosError.response?.status;
-    const message =
+    const errorMessage =
       axiosError.response?.data?.message ||
       axiosError.response?.data?.error ||
       axiosError.message ||
       'An unexpected error occurred';
-
-    throw new ApiError(
-      message,
-      status,
-      axiosError.response?.data?.code
-    );
+    throw new Error(errorMessage);
   }
-
-  throw new ApiError('An unexpected error occurred');
+  throw error;
 };
 
 interface UserResponse {
@@ -118,7 +76,7 @@ export const auth = {
       });
       // Store user data in localStorage (not sensitive)
       localStorage.setItem(
-        'userData',
+        'token',
         JSON.stringify(response.data.user)
       );
       return response.data;
@@ -139,7 +97,7 @@ export const auth = {
       });
       // Store user data in localStorage (not sensitive)
       localStorage.setItem(
-        'userData',
+        'token',
         JSON.stringify(response.data.user)
       );
       return response.data;
@@ -148,21 +106,14 @@ export const auth = {
     }
   },
   getCurrentUser: () => {
-    const userData = localStorage.getItem('userData');
-    if (!userData) return null;
-
-    try {
-      return JSON.parse(userData);
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      localStorage.removeItem('userData');
-      return null;
-    }
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return token;
   },
   logout: async () => {
     try {
       await api.post('/users/logout');
-      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
     } catch (error) {
       throw handleApiError(error);
     }
@@ -192,49 +143,6 @@ export const soundboard = {
     description: string
   ) => {
     try {
-      // Validate file type
-      if (!file.type.startsWith('audio/')) {
-        throw new ApiError(
-          'Please upload an audio file',
-          400,
-          'INVALID_FILE_TYPE'
-        );
-      }
-
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        throw new ApiError(
-          'File size must be less than 10MB',
-          400,
-          'FILE_TOO_LARGE'
-        );
-      }
-
-      // Validate title and description
-      if (!title.trim() || !description.trim()) {
-        throw new ApiError(
-          'Title and description are required',
-          400,
-          'MISSING_FIELDS'
-        );
-      }
-
-      if (title.length > 100) {
-        throw new ApiError(
-          'Title must be less than 100 characters',
-          400,
-          'TITLE_TOO_LONG'
-        );
-      }
-
-      if (description.length > 500) {
-        throw new ApiError(
-          'Description must be less than 500 characters',
-          400,
-          'DESCRIPTION_TOO_LONG'
-        );
-      }
-
       // First get the pre-signed URL
       const { data } = await api.get<UploadUrlResponse>(
         '/sounds/upload-url',
