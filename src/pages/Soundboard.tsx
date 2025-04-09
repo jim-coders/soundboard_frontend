@@ -317,15 +317,35 @@ const Soundboard = () => {
                   )}
                   <IconButton
                     aria-label="Delete sound"
-                    icon={<DeleteIcon />}
-                    variant="ghost"
-                    colorScheme="red"
-                    size="xs"
+                    icon={<DeleteIcon boxSize={4} color="red.500" />}
+                    variant="unstyled"
+                    size="sm"
                     opacity={0}
+                    border="none"
+                    borderWidth="0"
+                    outline="none"
                     _groupHover={{ opacity: 1 }}
+                    _hover={{
+                      bg: 'transparent',
+                      border: 'none',
+                      borderWidth: '0',
+                      outline: 'none',
+                    }}
+                    _active={{
+                      bg: 'transparent',
+                      border: 'none',
+                      borderWidth: '0',
+                      outline: 'none',
+                    }}
+                    _focus={{
+                      boxShadow: 'none',
+                      border: 'none',
+                      borderWidth: '0',
+                      outline: 'none',
+                    }}
                     position="absolute"
-                    top={-1}
-                    right={-1}
+                    top={0}
+                    right={1}
                     onClick={() => handleDelete(sound._id)}
                   />
                 </Box>
