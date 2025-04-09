@@ -1,14 +1,18 @@
 import { Navigate } from 'react-router-dom';
-import { auth } from '../services/api';
+import { useAuth } from '../context/auth.context';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const currentUser = auth.getCurrentUser();
+  const { user, isLoading } = useAuth();
 
-  if (!currentUser) {
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
+
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

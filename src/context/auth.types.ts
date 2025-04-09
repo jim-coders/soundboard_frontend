@@ -1,11 +1,3 @@
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  favorites: string[];
-  createdAt: string;
-}
-
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -16,4 +8,11 @@ export interface AuthContextType {
     password: string
   ) => Promise<void>;
   logout: () => Promise<void>;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  createdAt: string;
 }

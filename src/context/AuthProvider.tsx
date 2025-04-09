@@ -11,20 +11,22 @@ export const AuthProvider: React.FC<{
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = auth.getCurrentUser();
-    if (token) {
-      // Fetch user data using the token
-      api
-        .get<{ user: User }>('/users/me')
-        .then((response) => {
-          setUser(response.data.user);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        });
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      try {
+        const token = auth.getCurrentUser();
+        if (token) {
+          const response = await api.get<User>('/users/me');
+          setUser(response.data);
+        }
+      } catch {
+        localStorage.removeItem('token');
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
