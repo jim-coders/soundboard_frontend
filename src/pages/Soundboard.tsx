@@ -22,7 +22,8 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { soundboard, auth } from '../services/api';
+import { soundboard } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 interface Sound {
   _id: string;
@@ -50,6 +51,7 @@ const Soundboard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
+  const { user, logout } = useAuth();
 
   const loadSounds = useCallback(async () => {
     try {
@@ -71,13 +73,12 @@ const Soundboard = () => {
   }, [toast]);
 
   useEffect(() => {
-    const currentUser = auth.getCurrentUser();
-    if (!currentUser) {
+    if (!user) {
       navigate('/login');
       return;
     }
     loadSounds();
-  }, [navigate, loadSounds]);
+  }, [navigate, loadSounds, user]);
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -154,15 +155,14 @@ const Soundboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
-
-  const currentUser = auth.getCurrentUser();
-  if (!currentUser) {
-    return null;
-  }
 
   return (
     <Box p={8}>
@@ -170,7 +170,7 @@ const Soundboard = () => {
         <HStack width="100%" justify="space-between">
           <Heading>Soundboard</Heading>
           <HStack spacing={4}>
-            <Text>Welcome, {currentUser.username}</Text>
+            <Text>Welcome, {user?.username}</Text>
             <Button onClick={handleLogout} colorScheme="red">
               Logout
             </Button>

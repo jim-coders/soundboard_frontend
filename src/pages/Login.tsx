@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -12,7 +12,8 @@ import {
   Link,
   useToast,
 } from '@chakra-ui/react';
-import { auth } from '../services/api';
+import { Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,31 +21,28 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await auth.login(email, password);
-      console.log({ response });
-      localStorage.setItem('token', response.token);
-
+      await login(email, password);
       toast({
         title: 'Login successful',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      navigate('/soundboard', { replace: true });
+      navigate('/soundboard');
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Invalid email or password';
       toast({
         title: 'Login failed',
-        description: errorMessage,
+        description:
+          error instanceof Error
+            ? error.message
+            : 'An error occurred',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -74,6 +72,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
               />
             </FormControl>
             <FormControl isRequired>
@@ -82,6 +81,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
               />
             </FormControl>
             <Button
@@ -97,7 +97,7 @@ const Login = () => {
         <Text>
           Don't have an account?{' '}
           <Link as={RouterLink} to="/signup" color="blue.500">
-            Sign up
+            Sign Up
           </Link>
         </Text>
       </VStack>

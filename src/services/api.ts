@@ -56,6 +56,7 @@ interface UserResponse {
     favorites: string[];
     createdAt: string;
   };
+  token: string;
 }
 
 interface UploadUrlResponse {
@@ -74,11 +75,7 @@ export const auth = {
         email,
         password,
       });
-      // Store user data in localStorage (not sensitive)
-      localStorage.setItem(
-        'token',
-        JSON.stringify(response.data.user)
-      );
+      localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -95,11 +92,7 @@ export const auth = {
         email,
         password,
       });
-      // Store user data in localStorage (not sensitive)
-      localStorage.setItem(
-        'token',
-        JSON.stringify(response.data.user)
-      );
+      localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
