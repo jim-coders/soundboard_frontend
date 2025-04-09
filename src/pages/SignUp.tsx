@@ -11,6 +11,8 @@ import {
   Text,
   Link,
   useToast,
+  Container,
+  Flex,
 } from '@chakra-ui/react';
 import { auth } from '../services/api';
 
@@ -112,72 +114,148 @@ const SignUp = () => {
   };
 
   return (
-    <Box
-      maxW="md"
-      mx="auto"
-      mt={8}
-      p={6}
-      borderWidth={1}
-      borderRadius={8}
-      boxShadow="lg"
+    <Flex
+      minH="100vh"
+      width="100%"
+      bg="brand.dark.400"
+      alignItems="center"
+      justifyContent="center"
+      p={4}
     >
-      <VStack spacing={4}>
-        <Heading>Sign Up</Heading>
-        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <VStack spacing={4}>
-            <FormControl isRequired>
-              <FormLabel>Username</FormLabel>
-              <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Email</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Password</FormLabel>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Confirm Password</FormLabel>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
-              />
-            </FormControl>
-            <Button
-              type="submit"
-              colorScheme="blue"
-              width="100%"
-              isLoading={isLoading}
+      <Container maxW="md">
+        <Box
+          bg="brand.dark.300"
+          p={8}
+          borderRadius="xl"
+          boxShadow="dark-lg"
+          border="2px solid"
+          borderColor="brand.dark.100"
+          position="relative"
+          _before={{
+            content: '""',
+            position: 'absolute',
+            top: '-2px',
+            left: '-2px',
+            right: '-2px',
+            bottom: '-2px',
+            borderRadius: 'xl',
+            padding: '2px',
+            background:
+              'linear-gradient(45deg, var(--chakra-colors-brand-neonGreen), var(--chakra-colors-brand-neonBlue))',
+            WebkitMask:
+              'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+            zIndex: -1,
+          }}
+        >
+          <VStack spacing={6}>
+            <Heading
+              bgGradient="linear(to-r, brand.neonGreen, brand.neonBlue)"
+              bgClip="text"
+              textShadow="0 0 10px rgba(57, 255, 20, 0.5)"
             >
               Sign Up
-            </Button>
+            </Heading>
+            <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+              <VStack spacing={4}>
+                <FormControl isRequired>
+                  <FormLabel color="brand.neonBlue">
+                    Username
+                  </FormLabel>
+                  <Input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    borderColor="brand.dark.100"
+                    _hover={{ borderColor: 'brand.neonGreen' }}
+                    _focus={{
+                      borderColor: 'brand.neonGreen',
+                      boxShadow:
+                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
+                    }}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel color="brand.neonBlue">Email</FormLabel>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    borderColor="brand.dark.100"
+                    _hover={{ borderColor: 'brand.neonGreen' }}
+                    _focus={{
+                      borderColor: 'brand.neonGreen',
+                      boxShadow:
+                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
+                    }}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel color="brand.neonBlue">
+                    Password
+                  </FormLabel>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    borderColor="brand.dark.100"
+                    _hover={{ borderColor: 'brand.neonGreen' }}
+                    _focus={{
+                      borderColor: 'brand.neonGreen',
+                      boxShadow:
+                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
+                    }}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel color="brand.neonBlue">
+                    Confirm Password
+                  </FormLabel>
+                  <Input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) =>
+                      setConfirmPassword(e.target.value)
+                    }
+                    placeholder="Confirm your password"
+                    borderColor="brand.dark.100"
+                    _hover={{ borderColor: 'brand.neonGreen' }}
+                    _focus={{
+                      borderColor: 'brand.neonGreen',
+                      boxShadow:
+                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
+                    }}
+                  />
+                </FormControl>
+                <Button
+                  type="submit"
+                  width="100%"
+                  isLoading={isLoading}
+                  bg="brand.neonGreen"
+                  color="black"
+                  _hover={{ bg: 'brand.neonBlue' }}
+                >
+                  Sign Up
+                </Button>
+              </VStack>
+            </form>
+            <Text color="whiteAlpha.800">
+              Already have an account?{' '}
+              <Link
+                as={RouterLink}
+                to="/login"
+                color="brand.neonBlue"
+              >
+                Login
+              </Link>
+            </Text>
           </VStack>
-        </form>
-        <Text>
-          Already have an account?{' '}
-          <Link as={RouterLink} to="/login" color="blue.500">
-            Login
-          </Link>
-        </Text>
-      </VStack>
-    </Box>
+        </Box>
+      </Container>
+    </Flex>
   );
 };
 
