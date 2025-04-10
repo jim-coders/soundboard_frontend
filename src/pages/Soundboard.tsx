@@ -49,7 +49,6 @@ const Soundboard = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
@@ -105,9 +104,20 @@ const Soundboard = () => {
       return;
     }
 
+    if (title.length > 20) {
+      toast({
+        title: 'Error',
+        description: 'Title must be 20 characters or less',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
-      await soundboard.uploadSound(selectedFile, title, description);
+      await soundboard.uploadSound(selectedFile, title, '');
       await loadSounds();
       toast({
         title: 'Sound uploaded successfully',
@@ -118,7 +128,6 @@ const Soundboard = () => {
       onClose();
       setSelectedFile(null);
       setTitle('');
-      setDescription('');
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Upload failed';
@@ -303,18 +312,6 @@ const Soundboard = () => {
                       }
                     }}
                   />
-                  {sound.description && (
-                    <Text
-                      fontSize="2xs"
-                      color="whiteAlpha.700"
-                      mt={2}
-                      noOfLines={1}
-                      textAlign="center"
-                      maxW="95px"
-                    >
-                      {sound.description}
-                    </Text>
-                  )}
                   <IconButton
                     aria-label="Delete sound"
                     icon={<DeleteIcon boxSize={4} color="red.500" />}
@@ -367,28 +364,14 @@ const Soundboard = () => {
           <ModalBody pb={6}>
             <VStack spacing={4}>
               <FormControl isRequired>
-                <FormLabel color="whiteAlpha.900">Title</FormLabel>
+                <FormLabel color="whiteAlpha.900">
+                  Title (max 20 characters)
+                </FormLabel>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter sound title"
-                  borderColor="whiteAlpha.200"
-                  _hover={{ borderColor: 'whiteAlpha.300' }}
-                  _focus={{
-                    borderColor: 'brand.neonBlue',
-                    boxShadow:
-                      '0 0 0 1px var(--chakra-colors-brand-neonBlue)',
-                  }}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel color="whiteAlpha.900">
-                  Description
-                </FormLabel>
-                <Input
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter sound description (optional)"
+                  maxLength={20}
                   borderColor="whiteAlpha.200"
                   _hover={{ borderColor: 'whiteAlpha.300' }}
                   _focus={{

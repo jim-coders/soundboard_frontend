@@ -13,19 +13,11 @@ export const SoundButton = ({
   return (
     <Button
       variant="soundPad"
-      borderColor={glowColor}
-      _hover={{
-        transform: 'translateY(-2px)',
-        bg: 'blackAlpha.600',
-        boxShadow: `0 4px 12px ${glowColor}40`,
-        borderColor: glowColor,
-      }}
-      _active={{
-        transform: 'translateY(0)',
-        bg: 'blackAlpha.700',
-        boxShadow: `0 0 16px ${glowColor}60`,
-        borderColor: glowColor,
-      }}
+      style={
+        {
+          '--chakra-colors-borderColor': glowColor,
+        } as React.CSSProperties
+      }
       {...props}
     >
       <Text

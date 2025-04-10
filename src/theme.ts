@@ -67,10 +67,11 @@ const theme = extendTheme({
           width: '120px',
           height: '120px',
           aspectRatio: '1',
-          bg: 'gray.800',
+          bg: 'black',
           color: 'white',
-          border: '2px solid',
-          borderRadius: 'md',
+          border: '3px solid',
+          borderColor: 'var(--chakra-colors-borderColor)',
+          borderRadius: 'lg',
           transition: 'all 0.2s ease-in-out',
           fontSize: 'sm',
           fontWeight: 'bold',
@@ -81,6 +82,48 @@ const theme = extendTheme({
           padding: '2',
           position: 'relative',
           overflow: 'hidden',
+          transform: 'translateY(-4px)',
+          boxShadow:
+            '0 8px 12px rgba(0, 0, 0, 0.2), 0 0 10px var(--chakra-colors-borderColor), inset 0 0 15px var(--chakra-colors-borderColor)',
+          _before: {
+            content: '""',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '60%',
+            height: '60%',
+            borderRadius: '50%',
+            background: 'var(--chakra-colors-borderColor)',
+            filter: 'blur(15px)',
+            opacity: 0.2,
+            zIndex: 0,
+          },
+          _hover: {
+            borderColor: 'var(--chakra-colors-borderColor)',
+            boxShadow:
+              '0 8px 12px rgba(0, 0, 0, 0.2), 0 0 15px var(--chakra-colors-borderColor), inset 0 0 20px var(--chakra-colors-borderColor)',
+            _before: {
+              opacity: 0.3,
+            },
+          },
+          _active: {
+            transform: 'translateY(0)',
+            borderColor: 'var(--chakra-colors-borderColor)',
+            boxShadow:
+              '0 2px 4px rgba(0, 0, 0, 0.1), 0 0 8px var(--chakra-colors-borderColor), inset 0 0 12px var(--chakra-colors-borderColor)',
+            _before: {
+              opacity: 0.15,
+            },
+          },
+          _focus: {
+            outline: 'none',
+            borderColor: 'var(--chakra-colors-borderColor)',
+          },
+          '& > *': {
+            position: 'relative',
+            zIndex: 1,
+          },
         },
       },
     },
