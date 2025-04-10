@@ -21,28 +21,12 @@ import {
   ModalCloseButton,
   useDisclosure,
 } from '@chakra-ui/react';
+import { Sound } from 'types';
 import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { soundboard } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { SoundButton } from '../components/SoundButton';
 import { generateColor } from '../theme';
-
-interface Sound {
-  _id: string;
-  title: string;
-  description?: string;
-  duration?: string;
-  metadata: {
-    s3Key: string;
-    bucketName: string;
-    fileType: string;
-  };
-  user: {
-    username: string;
-    email: string;
-  };
-  createdAt: string;
-}
 
 const Soundboard = () => {
   const [sounds, setSounds] = useState<Sound[]>([]);

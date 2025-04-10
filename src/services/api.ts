@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { Sound } from '../types/sound';
+import { Sound } from '../types';
 
 const API_URL = 'http://localhost:4000';
 

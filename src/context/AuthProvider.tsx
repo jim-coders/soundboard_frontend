@@ -1,14 +1,8 @@
 import { useState, useEffect, ReactNode } from 'react';
+import { User } from 'types';
 import { AuthContext } from './AuthContext';
-import api from '../services/api';
 import { auth } from '../services/api';
-
-interface User {
-  _id: string;
-  username: string;
-  email: string;
-  createdAt: string;
-}
+import api from '../services/api';
 
 export const AuthProvider = ({
   children,
