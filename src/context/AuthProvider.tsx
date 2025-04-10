@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { auth } from '../services/api';
+import { useState, useEffect, ReactNode } from 'react';
+import { AuthContext } from './AuthContext';
 import api from '../services/api';
-import { AuthContext } from './auth.context';
-import { AuthContextType, User } from './auth.types';
+import { auth } from '../services/api';
 
-export const AuthProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  const [user, setUser] = useState<AuthContextType['user']>(null);
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  createdAt: string;
+}
+
+export const AuthProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

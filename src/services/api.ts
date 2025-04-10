@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { Sound } from '../types/sound';
 
 const API_URL = 'http://localhost:4000';
 
@@ -114,17 +115,19 @@ export const auth = {
 };
 
 export const soundboard = {
-  getSounds: async () => {
+  getSounds: async (): Promise<Sound[]> => {
     try {
-      const response = await api.get('/sounds');
+      const response = await api.get<Sound[]>('/sounds');
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
-  getSoundUrl: async (id: string) => {
+  getSoundUrl: async (id: string): Promise<string> => {
     try {
-      const response = await api.get(`/sounds/${id}/url`);
+      const response = await api.get<{ url: string }>(
+        `/sounds/${id}/url`
+      );
       return response.data.url;
     } catch (error) {
       throw handleApiError(error);
@@ -155,7 +158,7 @@ export const soundboard = {
       });
 
       // Create the sound record in our database
-      const response = await api.post('/sounds', {
+      const response = await api.post<Sound>('/sounds', {
         title,
         description,
         metadata: {
@@ -171,10 +174,9 @@ export const soundboard = {
       throw handleApiError(error);
     }
   },
-  deleteSound: async (id: string) => {
+  deleteSound: async (id: string): Promise<void> => {
     try {
-      const response = await api.delete(`/sounds/${id}`);
-      return response.data;
+      await api.delete(`/sounds/${id}`);
     } catch (error) {
       throw handleApiError(error);
     }
