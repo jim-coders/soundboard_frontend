@@ -81,15 +81,71 @@ const Soundboard = () => {
     loadSounds();
   }, [navigate, loadSounds, user]);
 
-  const handleFileSelect = (
+  const handleFileSelect = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setTitle(file.name.split('.')[0]); // Set default title from filename
-      onOpen();
+    if (!file) return;
+
+    // Check file size (1MB limit)
+    const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: 'File too large',
+        description: 'Please select a file smaller than 1MB',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
     }
+
+    // Check file type
+    if (!file.type.startsWith('audio/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please select an audio file',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Check duration (10 seconds limit)
+    try {
+      const audio = new Audio(URL.createObjectURL(file));
+      await new Promise((resolve, reject) => {
+        audio.onloadedmetadata = resolve;
+        audio.onerror = reject;
+      });
+
+      if (audio.duration > 10) {
+        toast({
+          title: 'Audio too long',
+          description:
+            'Please select an audio file shorter than 10 seconds',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking audio:', error);
+      toast({
+        title: 'Error checking audio',
+        description: 'Could not verify audio duration',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setTitle(file.name.split('.')[0]); // Set default title from filename
+    onOpen();
   };
 
   const handleUpload = async () => {
