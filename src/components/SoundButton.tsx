@@ -18,6 +18,9 @@ export const SoundButton = ({
           '--chakra-colors-borderColor': glowColor,
         } as React.CSSProperties
       }
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
       {...props}
     >
       <Text
@@ -25,6 +28,9 @@ export const SoundButton = ({
         textOverflow="ellipsis"
         overflow="hidden"
         whiteSpace="nowrap"
+        fontSize="lg"
+        fontWeight="medium"
+        px={2}
       >
         {title}
       </Text>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@chakra-ui/react';
 import { soundboard } from '../services/api';
@@ -10,14 +10,31 @@ export const useSoundboard = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const audioCache = useRef<Map<string, HTMLAudioElement>>(new Map());
   const navigate = useNavigate();
   const toast = useToast();
   const { user, logout } = useAuth();
 
   const loadSounds = useCallback(async () => {
     try {
+      setIsLoading(true);
       const data = await soundboard.getSounds();
       setSounds(data);
+
+      // Preload all sounds
+      data.forEach(async (sound) => {
+        try {
+          const url = await soundboard.getSoundUrl(sound._id);
+          const audio = new Audio(url);
+          audioCache.current.set(sound._id, audio);
+        } catch (error) {
+          console.error(
+            `Failed to preload sound ${sound._id}:`,
+            error
+          );
+        }
+      });
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -30,8 +47,47 @@ export const useSoundboard = () => {
         duration: 3000,
         isClosable: true,
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [toast]);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Number keys 1-9 for quick sound access
+      if (e.key >= '1' && e.key <= '9' && !e.shiftKey) {
+        const index = parseInt(e.key) - 1;
+        if (sounds[index]) {
+          playSound(sounds[index]);
+        }
+      }
+
+      // Shift + Number keys 1-9 for sounds 10-18
+      if (e.key >= '1' && e.key <= '9' && e.shiftKey) {
+        const index = parseInt(e.key) + 8; // 1 becomes 9, 2 becomes 10, etc.
+        if (sounds[index]) {
+          playSound(sounds[index]);
+        }
+      }
+
+      // Space bar to play/stop current sound
+      if (e.key === ' ') {
+        e.preventDefault();
+        const currentAudio = Array.from(
+          audioCache.current.values()
+        ).find((audio) => !audio.paused);
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () =>
+      window.removeEventListener('keydown', handleKeyPress);
+  }, [sounds]);
 
   const handleFileSelect = async (file: File) => {
     // Check file size (1MB limit)
@@ -185,8 +241,22 @@ export const useSoundboard = () => {
 
   const playSound = async (sound: Sound) => {
     try {
-      const url = await soundboard.getSoundUrl(sound._id);
-      const audio = new Audio(url);
+      let audio = audioCache.current.get(sound._id);
+
+      if (!audio) {
+        const url = await soundboard.getSoundUrl(sound._id);
+        audio = new Audio(url);
+        audioCache.current.set(sound._id, audio);
+      }
+
+      // Stop any currently playing sounds
+      audioCache.current.forEach((a) => {
+        if (a !== audio && !a.paused) {
+          a.pause();
+          a.currentTime = 0;
+        }
+      });
+
       audio.onerror = (e) => {
         console.error('Audio error:', e);
         toast({
@@ -197,6 +267,7 @@ export const useSoundboard = () => {
           isClosable: true,
         });
       };
+
       await audio.play();
       return true;
     } catch (error) {
@@ -218,6 +289,7 @@ export const useSoundboard = () => {
   return {
     sounds,
     isUploading,
+    isLoading,
     selectedFile,
     title,
     setTitle,

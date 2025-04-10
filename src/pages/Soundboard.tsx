@@ -18,8 +18,12 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  Spinner,
+  Center,
+  Kbd,
+  Divider,
 } from '@chakra-ui/react';
-import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
+import { DeleteIcon, AddIcon, QuestionIcon } from '@chakra-ui/icons';
 import { useSoundboard } from '../hooks/useSoundboard';
 import { SoundButton } from '../components/SoundButton';
 import { generateColor } from '../theme';
@@ -27,8 +31,14 @@ import { generateColor } from '../theme';
 const Soundboard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
+    isOpen: isHelpOpen,
+    onOpen: onHelpOpen,
+    onClose: onHelpClose,
+  } = useDisclosure();
+  const {
     sounds,
     isUploading,
+    isLoading,
     title,
     setTitle,
     loadSounds,
@@ -91,6 +101,14 @@ const Soundboard = () => {
               Soundboard
             </Heading>
             <HStack spacing={4}>
+              <IconButton
+                aria-label="Keyboard shortcuts"
+                icon={<QuestionIcon />}
+                variant="ghost"
+                color="whiteAlpha.900"
+                _hover={{ bg: 'whiteAlpha.100' }}
+                onClick={onHelpOpen}
+              />
               <Text color="whiteAlpha.900" fontSize="md">
                 {user?.username}
               </Text>
@@ -202,67 +220,90 @@ const Soundboard = () => {
             </Text>
           </Box>
 
-          <Grid
-            templateColumns={{
-              base: 'repeat(auto-fill, minmax(120px, 1fr))',
-              md: 'repeat(auto-fill, minmax(120px, 1fr))',
-            }}
-            gap={4}
-            p={3}
-          >
-            {sounds.map((sound) => {
-              const color = generateColor(sound._id);
-              return (
-                <Box
-                  key={sound._id}
-                  position="relative"
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  role="group"
-                >
-                  <SoundButton
-                    title={sound.title}
-                    glowColor={color}
-                    onClick={() => playSound(sound)}
-                  />
-                  <IconButton
-                    aria-label="Delete sound"
-                    icon={<DeleteIcon boxSize={4} color="red.500" />}
-                    variant="unstyled"
-                    size="sm"
-                    opacity={0}
-                    border="none"
-                    borderWidth="0"
-                    outline="none"
-                    _groupHover={{ opacity: 1 }}
-                    _hover={{
-                      bg: 'transparent',
-                      border: 'none',
-                      borderWidth: '0',
-                      outline: 'none',
-                    }}
-                    _active={{
-                      bg: 'transparent',
-                      border: 'none',
-                      borderWidth: '0',
-                      outline: 'none',
-                    }}
-                    _focus={{
-                      boxShadow: 'none',
-                      border: 'none',
-                      borderWidth: '0',
-                      outline: 'none',
-                    }}
-                    position="absolute"
-                    top={0}
-                    right={1}
-                    onClick={() => handleDelete(sound._id)}
-                  />
-                </Box>
-              );
-            })}
-          </Grid>
+          {isLoading ? (
+            <Center py={10}>
+              <Spinner size="xl" color="brand.neonBlue" />
+            </Center>
+          ) : (
+            <Grid
+              templateColumns={{
+                base: 'repeat(9, 1fr)',
+                md: 'repeat(9, 1fr)',
+              }}
+              gap={4}
+              p={3}
+              maxW="1600px"
+              mx="auto"
+            >
+              {sounds.map((sound, index) => {
+                const color = generateColor(sound._id);
+                return (
+                  <Box
+                    key={sound._id}
+                    position="relative"
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    role="group"
+                    w="100%"
+                    h="160px"
+                  >
+                    <SoundButton
+                      title={sound.title}
+                      glowColor={color}
+                      onClick={() => playSound(sound)}
+                      w="100%"
+                      h="100%"
+                      minH="160px"
+                    />
+                    <Text
+                      position="absolute"
+                      top={-6}
+                      color="whiteAlpha.700"
+                      fontSize="xs"
+                    >
+                      {index < 9 ? `[${index + 1}]` : ''}
+                    </Text>
+                    <IconButton
+                      aria-label="Delete sound"
+                      icon={
+                        <DeleteIcon boxSize={4} color="red.500" />
+                      }
+                      variant="unstyled"
+                      size="sm"
+                      opacity={0}
+                      border="none"
+                      borderWidth="0"
+                      outline="none"
+                      _groupHover={{ opacity: 1 }}
+                      _hover={{
+                        bg: 'transparent',
+                        border: 'none',
+                        borderWidth: '0',
+                        outline: 'none',
+                      }}
+                      _active={{
+                        bg: 'transparent',
+                        border: 'none',
+                        borderWidth: '0',
+                        outline: 'none',
+                      }}
+                      _focus={{
+                        boxShadow: 'none',
+                        border: 'none',
+                        borderWidth: '0',
+                        outline: 'none',
+                      }}
+                      position="absolute"
+                      top={0}
+                      right={1}
+                      onClick={() => handleDelete(sound._id)}
+                    />
+                  </Box>
+                );
+              })}
+            </Grid>
+          )}
         </VStack>
       </Box>
 
@@ -305,6 +346,105 @@ const Soundboard = () => {
               >
                 Upload
               </Button>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isHelpOpen} onClose={onHelpClose}>
+        <ModalOverlay backdropFilter="blur(8px)" />
+        <ModalContent
+          bg="brand.dark.200"
+          borderColor="brand.dark.100"
+          borderWidth={1}
+        >
+          <ModalHeader color="white">Keyboard Shortcuts</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={6} align="stretch">
+              <Box>
+                <Text
+                  color="white"
+                  fontWeight="bold"
+                  mb={3}
+                  fontSize="lg"
+                >
+                  Play Sounds
+                </Text>
+                <VStack spacing={3} align="stretch">
+                  <HStack spacing={2}>
+                    <Kbd
+                      bg="brand.dark.300"
+                      color="white"
+                      borderColor="brand.neonBlue"
+                    >
+                      1
+                    </Kbd>
+                    <Text color="whiteAlpha.900">-</Text>
+                    <Kbd
+                      bg="brand.dark.300"
+                      color="white"
+                      borderColor="brand.neonBlue"
+                    >
+                      9
+                    </Kbd>
+                    <Text color="whiteAlpha.900">
+                      Play first 9 sounds
+                    </Text>
+                  </HStack>
+                  <HStack spacing={2}>
+                    <Kbd
+                      bg="brand.dark.300"
+                      color="white"
+                      borderColor="brand.neonBlue"
+                    >
+                      Shift
+                    </Kbd>
+                    <Text color="whiteAlpha.900">+</Text>
+                    <Kbd
+                      bg="brand.dark.300"
+                      color="white"
+                      borderColor="brand.neonBlue"
+                    >
+                      1
+                    </Kbd>
+                    <Text color="whiteAlpha.900">-</Text>
+                    <Kbd
+                      bg="brand.dark.300"
+                      color="white"
+                      borderColor="brand.neonBlue"
+                    >
+                      9
+                    </Kbd>
+                    <Text color="whiteAlpha.900">
+                      Play sounds 10-18
+                    </Text>
+                  </HStack>
+                </VStack>
+              </Box>
+              <Divider borderColor="whiteAlpha.300" />
+              <Box>
+                <Text
+                  color="white"
+                  fontWeight="bold"
+                  mb={3}
+                  fontSize="lg"
+                >
+                  Control
+                </Text>
+                <HStack spacing={2}>
+                  <Kbd
+                    bg="brand.dark.300"
+                    color="white"
+                    borderColor="brand.neonBlue"
+                  >
+                    Space
+                  </Kbd>
+                  <Text color="whiteAlpha.900">
+                    Stop current sound
+                  </Text>
+                </HStack>
+              </Box>
             </VStack>
           </ModalBody>
         </ModalContent>
