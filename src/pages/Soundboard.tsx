@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -7,7 +6,6 @@ import {
   Input,
   VStack,
   Heading,
-  useToast,
   IconButton,
   HStack,
   Text,
@@ -21,197 +19,47 @@ import {
   ModalCloseButton,
   useDisclosure,
 } from '@chakra-ui/react';
-import { Sound } from 'types';
 import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
-import { soundboard } from '../services/api';
-import { useAuth } from '../hooks/useAuth';
+import { useSoundboard } from '../hooks/useSoundboard';
 import { SoundButton } from '../components/SoundButton';
 import { generateColor } from '../theme';
 
 const Soundboard = () => {
-  const [sounds, setSounds] = useState<Sound[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [title, setTitle] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const navigate = useNavigate();
-  const toast = useToast();
-  const { user, logout } = useAuth();
-
-  const loadSounds = useCallback(async () => {
-    try {
-      const data = await soundboard.getSounds();
-      setSounds(data);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Error loading sounds';
-      toast({
-        title: 'Error loading sounds',
-        description: errorMessage,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [toast]);
+  const {
+    sounds,
+    isUploading,
+    title,
+    setTitle,
+    loadSounds,
+    handleFileSelect,
+    handleUpload,
+    handleDelete,
+    handleLogout,
+    playSound,
+    user,
+  } = useSoundboard();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     loadSounds();
-  }, [navigate, loadSounds, user]);
+  }, [loadSounds]);
 
-  const handleFileSelect = async (
+  const handleFileInputChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (1MB limit)
-    const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
-    if (file.size > MAX_FILE_SIZE) {
-      toast({
-        title: 'File too large',
-        description: 'Please select a file smaller than 1MB',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
+    const success = await handleFileSelect(file);
+    if (success) {
+      onOpen();
     }
-
-    // Check file type
-    if (!file.type.startsWith('audio/')) {
-      toast({
-        title: 'Invalid file type',
-        description: 'Please select an audio file',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Check duration (10 seconds limit)
-    try {
-      const audio = new Audio(URL.createObjectURL(file));
-      await new Promise((resolve, reject) => {
-        audio.onloadedmetadata = resolve;
-        audio.onerror = reject;
-      });
-
-      if (audio.duration > 10) {
-        toast({
-          title: 'Audio too long',
-          description:
-            'Please select an audio file shorter than 10 seconds',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking audio:', error);
-      toast({
-        title: 'Error checking audio',
-        description: 'Could not verify audio duration',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-    setTitle(file.name.split('.')[0]); // Set default title from filename
-    onOpen();
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile || !title) {
-      toast({
-        title: 'Error',
-        description: 'Please provide a title and select a file',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (title.length > 20) {
-      toast({
-        title: 'Error',
-        description: 'Title must be 20 characters or less',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      await soundboard.uploadSound(selectedFile, title, '');
-      await loadSounds();
-      toast({
-        title: 'Sound uploaded successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+  const handleUploadClick = async () => {
+    const success = await handleUpload();
+    if (success) {
       onClose();
-      setSelectedFile(null);
-      setTitle('');
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Upload failed';
-      toast({
-        title: 'Upload failed',
-        description: errorMessage,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await soundboard.deleteSound(id);
-      await loadSounds();
-      toast({
-        title: 'Sound deleted successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Delete failed';
-      toast({
-        title: 'Delete failed',
-        description: errorMessage,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
     }
   };
 
@@ -267,32 +115,91 @@ const Soundboard = () => {
             borderRadius="md"
             borderWidth="1px"
             borderColor="brand.dark.100"
+            position="relative"
+            display="flex"
+            justifyContent="center"
           >
-            <HStack spacing={4}>
+            <Box
+              position="relative"
+              width="60px"
+              height="60px"
+              borderRadius="full"
+              bg="brand.dark.300"
+              border="2px solid"
+              borderColor="brand.neonBlue"
+              boxShadow="0 0 10px rgba(0, 255, 255, 0.3)"
+              _hover={{
+                transform: 'scale(1.05)',
+                boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)',
+                borderColor: 'brand.neonGreen',
+              }}
+              _active={{
+                transform: 'scale(0.95)',
+                boxShadow: '0 0 5px rgba(0, 255, 255, 0.2)',
+              }}
+              transition="all 0.2s ease-in-out"
+            >
               <Input
                 type="file"
                 accept="audio/*"
-                onChange={handleFileSelect}
-                display="none"
+                onChange={handleFileInputChange}
                 id="file-upload"
+                opacity={0}
+                position="absolute"
+                zIndex={1}
+                width="100%"
+                height="100%"
+                cursor="pointer"
+                borderRadius="full"
               />
-              <label htmlFor="file-upload">
-                <Button
-                  as="span"
-                  variant="solid"
-                  bg="brand.neonBlue"
-                  color="white"
-                  _hover={{ bg: 'brand.neonGreen' }}
-                  loadingText="Uploading..."
-                  isLoading={isUploading}
-                  cursor="pointer"
-                  size="md"
-                  leftIcon={<AddIcon />}
-                >
-                  Add Sound
-                </Button>
-              </label>
-            </HStack>
+              <Button
+                as="label"
+                htmlFor="file-upload"
+                variant="unstyled"
+                width="100%"
+                height="100%"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                cursor="pointer"
+                position="relative"
+                _hover={{}}
+                _active={{}}
+              >
+                <AddIcon
+                  boxSize={6}
+                  color="brand.neonBlue"
+                  transition="all 0.2s ease-in-out"
+                  _groupHover={{
+                    color: 'brand.neonGreen',
+                    transform: 'rotate(90deg)',
+                  }}
+                />
+              </Button>
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                width="40px"
+                height="40px"
+                borderRadius="full"
+                border="2px solid"
+                borderColor="brand.neonBlue"
+                opacity={0.3}
+                pointerEvents="none"
+              />
+            </Box>
+            <Text
+              position="absolute"
+              bottom="-20px"
+              color="whiteAlpha.700"
+              fontSize="xs"
+              textAlign="center"
+              width="100%"
+            >
+              Add Sound
+            </Text>
           </Box>
 
           <Grid
@@ -304,9 +211,7 @@ const Soundboard = () => {
             p={3}
           >
             {sounds.map((sound) => {
-              // Generate a consistent color based on the sound's ID
               const color = generateColor(sound._id);
-
               return (
                 <Box
                   key={sound._id}
@@ -319,38 +224,7 @@ const Soundboard = () => {
                   <SoundButton
                     title={sound.title}
                     glowColor={color}
-                    onClick={async () => {
-                      try {
-                        const url = await soundboard.getSoundUrl(
-                          sound._id
-                        );
-                        const audio = new Audio(url);
-                        audio.onerror = (e) => {
-                          console.error('Audio error:', e);
-                          toast({
-                            title: 'Error playing sound',
-                            description:
-                              'Could not load the audio file',
-                            status: 'error',
-                            duration: 5000,
-                            isClosable: true,
-                          });
-                        };
-                        await audio.play();
-                      } catch (error) {
-                        console.error('Play error:', error);
-                        toast({
-                          title: 'Error playing sound',
-                          description:
-                            error instanceof Error
-                              ? error.message
-                              : 'Failed to play sound',
-                          status: 'error',
-                          duration: 5000,
-                          isClosable: true,
-                        });
-                      }
-                    }}
+                    onClick={() => playSound(sound)}
                   />
                   <IconButton
                     aria-label="Delete sound"
@@ -422,7 +296,7 @@ const Soundboard = () => {
                 />
               </FormControl>
               <Button
-                onClick={handleUpload}
+                onClick={handleUploadClick}
                 isLoading={isUploading}
                 width="100%"
                 bg="brand.neonBlue"
