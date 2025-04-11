@@ -1,59 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
   VStack,
   Heading,
   Text,
   Link,
-  useToast,
   Container,
   Flex,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { LoginForm } from '../components/auth/LoginForm';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const toast = useToast();
-  const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await login(email, password);
-      toast({
-        title: 'Login successful',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      navigate('/soundboard');
-    } catch (error) {
-      toast({
-        title: 'Login failed',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'An error occurred',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <Flex
       minH="100vh"
@@ -98,54 +55,7 @@ const Login = () => {
             >
               Login
             </Heading>
-            <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-              <VStack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel color="brand.neonBlue">Email</FormLabel>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    borderColor="brand.dark.100"
-                    _hover={{ borderColor: 'brand.neonGreen' }}
-                    _focus={{
-                      borderColor: 'brand.neonGreen',
-                      boxShadow:
-                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
-                    }}
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel color="brand.neonBlue">
-                    Password
-                  </FormLabel>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    borderColor="brand.dark.100"
-                    _hover={{ borderColor: 'brand.neonGreen' }}
-                    _focus={{
-                      borderColor: 'brand.neonGreen',
-                      boxShadow:
-                        '0 0 0 1px var(--chakra-colors-brand-neonGreen)',
-                    }}
-                  />
-                </FormControl>
-                <Button
-                  type="submit"
-                  width="100%"
-                  isLoading={isLoading}
-                  bg="brand.neonGreen"
-                  color="black"
-                  _hover={{ bg: 'brand.neonBlue' }}
-                >
-                  Login
-                </Button>
-              </VStack>
-            </form>
+            <LoginForm />
             <Text color="whiteAlpha.800">
               Don't have an account?{' '}
               <Link
