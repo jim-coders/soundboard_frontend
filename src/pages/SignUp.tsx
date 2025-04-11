@@ -14,7 +14,7 @@ import {
   Container,
   Flex,
 } from '@chakra-ui/react';
-import { auth } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const SignUp = () => {
   const [username, setUsername] = useState('');
@@ -24,6 +24,7 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const { signup } = useAuth();
 
   // Form validation
   const validateForm = () => {
@@ -84,7 +85,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await auth.signup(username, email, password);
+      await signup(username, email, password);
 
       toast({
         title: 'Account created',

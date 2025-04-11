@@ -2,7 +2,6 @@ import { useState, useEffect, ReactNode } from 'react';
 import { User } from 'types';
 import { AuthContext } from './AuthContext';
 import { auth } from '../services/api';
-import api from '../services/api';
 
 export const AuthProvider = ({
   children,
@@ -13,27 +12,38 @@ export const AuthProvider = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const initializeAuth = async () => {
       try {
-        const token = auth.getCurrentUser();
-        if (token) {
-          const response = await api.get<User>('/users/me');
-          setUser(response.data);
+        const userData = await auth.getCurrentUser();
+        if (!controller.signal.aborted) {
+          setUser(userData);
         }
       } catch {
-        localStorage.removeItem('token');
-        setUser(null);
+        if (!controller.signal.aborted) {
+          setUser(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
+
+    return () => controller.abort();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await auth.login(email, password);
-    setUser(response.user);
+    setIsLoading(true);
+    try {
+      const response = await auth.login(email, password);
+      setUser(response.user);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const signup = async (
@@ -41,13 +51,23 @@ export const AuthProvider = ({
     email: string,
     password: string
   ) => {
-    const response = await auth.signup(username, email, password);
-    setUser(response.user);
+    setIsLoading(true);
+    try {
+      const response = await auth.signup(username, email, password);
+      setUser(response.user);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
-    await auth.logout();
-    setUser(null);
+    setIsLoading(true);
+    try {
+      await auth.logout();
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

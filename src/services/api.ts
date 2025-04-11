@@ -1,18 +1,14 @@
 import axios, { AxiosError } from 'axios';
 import { Sound } from '../types';
 
-const API_URL = 'http://localhost:4000';
-
 const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // This is important for cookies
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
+  withCredentials: true, // Important for cookies
 });
 
-// Add token to requests if it exists
+// Request interceptor
 api.interceptors.request.use((config) => {
+  // Get token from localStorage (existing functionality)
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -20,13 +16,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle unauthorized responses
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect, just reject the promise
+      return Promise.reject(new Error('Unauthorized'));
     }
     return Promise.reject(error);
   }
@@ -76,7 +72,6 @@ export const auth = {
         email,
         password,
       });
-      localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -93,21 +88,23 @@ export const auth = {
         email,
         password,
       });
-      localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
-  getCurrentUser: () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    return token;
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/users/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      return null;
+    }
   },
   logout: async () => {
     try {
       await api.post('/users/logout');
-      localStorage.removeItem('token');
     } catch (error) {
       throw handleApiError(error);
     }
