@@ -64,6 +64,9 @@ const Soundboard = () => {
     if (success) {
       onOpen();
     }
+
+    // Reset the input value so the same file can be selected again
+    e.target.value = '';
   };
 
   const handleUploadClick = async () => {
