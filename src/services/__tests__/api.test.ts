@@ -24,13 +24,11 @@ import { auth, soundboard } from '../api';
 describe('API Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorage.clear();
   });
 
   describe('Auth Service', () => {
     it('should handle successful login', async () => {
       const mockResponse = {
-        token: 'test-token',
         user: {
           _id: '1',
           username: 'testuser',
@@ -62,7 +60,6 @@ describe('API Service', () => {
 
     it('should handle successful signup', async () => {
       const mockResponse = {
-        token: 'test-token',
         user: {
           _id: '1',
           username: 'newuser',

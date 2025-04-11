@@ -6,16 +6,6 @@ const api = axios.create({
   withCredentials: true, // Important for cookies
 });
 
-// Request interceptor
-api.interceptors.request.use((config) => {
-  // Get token from localStorage (existing functionality)
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
