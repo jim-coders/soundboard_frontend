@@ -9,7 +9,6 @@ import {
   FormLabel,
 } from '@chakra-ui/react';
 import { useAuth } from '../../../hooks/useAuth';
-import { auth } from '../../../services/api';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +23,6 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      await auth.login(email, password);
       await login(email, password);
       navigate('/soundboard');
     } catch (error) {
