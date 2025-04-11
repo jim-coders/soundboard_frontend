@@ -320,36 +320,43 @@ const Soundboard = () => {
           <ModalHeader color="white">Add New Sound</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <VStack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel color="whiteAlpha.900">
-                  Title (max 20 characters)
-                </FormLabel>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter sound title"
-                  maxLength={20}
-                  borderColor="whiteAlpha.200"
-                  _hover={{ borderColor: 'whiteAlpha.300' }}
-                  _focus={{
-                    borderColor: 'brand.neonBlue',
-                    boxShadow:
-                      '0 0 0 1px var(--chakra-colors-brand-neonBlue)',
-                  }}
-                />
-              </FormControl>
-              <Button
-                onClick={handleUploadClick}
-                isLoading={isUploading}
-                width="100%"
-                bg="brand.neonBlue"
-                color="white"
-                _hover={{ bg: 'brand.neonGreen' }}
-              >
-                Upload
-              </Button>
-            </VStack>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleUploadClick();
+              }}
+            >
+              <VStack spacing={4}>
+                <FormControl isRequired>
+                  <FormLabel color="whiteAlpha.900">
+                    Title (max 20 characters)
+                  </FormLabel>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter sound title"
+                    maxLength={20}
+                    borderColor="whiteAlpha.200"
+                    _hover={{ borderColor: 'whiteAlpha.300' }}
+                    _focus={{
+                      borderColor: 'brand.neonBlue',
+                      boxShadow:
+                        '0 0 0 1px var(--chakra-colors-brand-neonBlue)',
+                    }}
+                  />
+                </FormControl>
+                <Button
+                  type="submit"
+                  isLoading={isUploading}
+                  width="100%"
+                  bg="brand.neonBlue"
+                  color="white"
+                  _hover={{ bg: 'brand.neonGreen' }}
+                >
+                  Upload
+                </Button>
+              </VStack>
+            </form>
           </ModalBody>
         </ModalContent>
       </Modal>
