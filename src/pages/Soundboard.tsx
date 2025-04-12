@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Box,
   Grid,
@@ -35,6 +35,7 @@ const Soundboard = () => {
     onOpen: onHelpOpen,
     onClose: onHelpClose,
   } = useDisclosure();
+  const inputRef = useRef<HTMLInputElement>(null!);
   const {
     sounds,
     isUploading,
@@ -172,6 +173,7 @@ const Soundboard = () => {
                 height="100%"
                 cursor="pointer"
                 borderRadius="full"
+                pointerEvents="none"
               />
               <Button
                 as="label"
@@ -310,7 +312,11 @@ const Soundboard = () => {
         </VStack>
       </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        initialFocusRef={inputRef}
+      >
         <ModalOverlay backdropFilter="blur(8px)" />
         <ModalContent
           bg="brand.dark.200"
@@ -332,6 +338,7 @@ const Soundboard = () => {
                     Title (max 20 characters)
                   </FormLabel>
                   <Input
+                    ref={inputRef}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter sound title"
