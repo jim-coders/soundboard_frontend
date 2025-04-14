@@ -21,7 +21,7 @@ export const SoundboardHeader = ({
   return (
     <HStack width="100%" justify="space-between">
       <Heading size="lg" color="white" letterSpacing="tight">
-        Soundboard
+        Soundbored
       </Heading>
       <HStack spacing={4}>
         <IconButton
