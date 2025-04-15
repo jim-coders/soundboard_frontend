@@ -1,14 +1,15 @@
+import { Box, ChakraProvider } from '@chakra-ui/react';
+import { AuthProvider } from './context/AuthProvider';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
 } from 'react-router-dom';
-import { ChakraProvider, Box } from '@chakra-ui/react';
-import { AuthProvider } from './context/AuthProvider';
-import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Soundboard from './pages/Soundboard';
+import PrivateRoute from './components/PrivateRoute';
+import { Landing } from './pages/Landing';
 import theme from './theme';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Router>
           <Box width="100vw" minH="100vh" overflow="hidden">
             <Routes>
+              <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route
@@ -28,7 +30,6 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route path="/" element={<Login />} />
             </Routes>
           </Box>
         </Router>
