@@ -8,8 +8,10 @@ import {
   Text,
   VStack,
   Flex,
+  HStack,
 } from '@chakra-ui/react';
 import { FallingNotes } from '../components/FallingNotes';
+import { useAuth } from '../hooks/useAuth';
 
 const triggerCelebration = () => {
   confetti({
@@ -21,20 +23,37 @@ const triggerCelebration = () => {
 
 export const Landing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
       <FallingNotes />
       <Flex justify="flex-end" p={4} position="relative" zIndex={2}>
-        <Button
-          variant="ghost"
-          colorScheme="green"
-          onClick={() => navigate('/login')}
-          _hover={{ transform: 'scale(1.05)' }}
-          transition="all 0.2s"
-        >
-          Login
-        </Button>
+        <HStack spacing={4}>
+          {user ? (
+            <>
+              <Button
+                variant="ghost"
+                colorScheme="green"
+                onClick={() => navigate('/soundboard')}
+                _hover={{ transform: 'scale(1.05)' }}
+                transition="all 0.2s"
+              >
+                Go to Soundboard
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              colorScheme="green"
+              onClick={() => navigate('/login')}
+              _hover={{ transform: 'scale(1.05)' }}
+              transition="all 0.2s"
+            >
+              Login
+            </Button>
+          )}
+        </HStack>
       </Flex>
       <Container
         maxW="container.md"
@@ -62,15 +81,27 @@ export const Landing = () => {
           </Text>
 
           <Box py={4}>
-            <Button
-              size="lg"
-              colorScheme="green"
-              onClick={() => navigate('/signup')}
-              _hover={{ transform: 'scale(1.05)' }}
-              transition="all 0.2s"
-            >
-              Make Some Noise
-            </Button>
+            {user ? (
+              <Button
+                size="lg"
+                colorScheme="green"
+                onClick={() => navigate('/soundboard')}
+                _hover={{ transform: 'scale(1.05)' }}
+                transition="all 0.2s"
+              >
+                Back to Soundboard
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                colorScheme="green"
+                onClick={() => navigate('/signup')}
+                _hover={{ transform: 'scale(1.05)' }}
+                transition="all 0.2s"
+              >
+                Make Some Noise
+              </Button>
+            )}
           </Box>
 
           <Text fontSize="sm" color="gray.500" textAlign="center">

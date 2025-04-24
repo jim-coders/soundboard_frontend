@@ -4,7 +4,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from 'react-router-dom';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -16,7 +15,7 @@ import { useAuth } from './hooks/useAuth';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const AppRoutes = () => {
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner message="Loading..." />;
@@ -24,12 +23,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          user ? <Navigate to="/soundboard" replace /> : <Landing />
-        }
-      />
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route
