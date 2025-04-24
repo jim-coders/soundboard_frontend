@@ -4,6 +4,8 @@ import {
   FormLabel,
   Input,
   Button,
+  FormErrorMessage,
+  Box,
 } from '@chakra-ui/react';
 import { useSignUpForm } from '../../../hooks/useSignUpForm';
 
@@ -19,9 +21,12 @@ export const SignUpForm = () => {
     handleSubmit,
   } = useSignUpForm();
 
+  const isUsernameInvalid =
+    username.trim().length > 0 && username.trim().length < 3;
+
   return (
     <VStack as="form" spacing={4} onSubmit={handleSubmit}>
-      <FormControl isRequired>
+      <FormControl isRequired isInvalid={isUsernameInvalid}>
         <FormLabel color="whiteAlpha.900">Username</FormLabel>
         <Input
           value={username}
@@ -35,6 +40,13 @@ export const SignUpForm = () => {
               '0 0 0 1px var(--chakra-colors-brand-neonBlue)',
           }}
         />
+        <Box h="20px" mt={1}>
+          {isUsernameInvalid && (
+            <FormErrorMessage>
+              Username must be at least 3 characters
+            </FormErrorMessage>
+          )}
+        </Box>
       </FormControl>
       <FormControl isRequired>
         <FormLabel color="whiteAlpha.900">Email</FormLabel>

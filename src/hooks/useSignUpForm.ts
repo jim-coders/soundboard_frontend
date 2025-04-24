@@ -23,6 +23,17 @@ export const useSignUpForm = () => {
       return false;
     }
 
+    if (username.trim().length < 3) {
+      toast({
+        title: 'Error',
+        description: 'Username must be at least 3 characters',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
+    }
+
     if (!email.trim()) {
       toast({
         title: 'Error',
