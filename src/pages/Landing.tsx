@@ -106,7 +106,7 @@ export const Landing = () => {
                 _hover={{ transform: 'scale(1.05)' }}
                 transition="all 0.2s"
               >
-                Make Some Noise
+                Beep Boop Beep
               </Button>
             )}
           </Box>
