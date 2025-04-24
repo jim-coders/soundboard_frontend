@@ -10,8 +10,6 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { FallingNotes } from '../components/FallingNotes';
-import { useAuth } from '../hooks/useAuth';
-import { useEffect } from 'react';
 
 const triggerCelebration = () => {
   confetti({
@@ -23,17 +21,6 @@ const triggerCelebration = () => {
 
 export const Landing = () => {
   const navigate = useNavigate();
-  const { user, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && user) {
-      navigate('/soundboard', { replace: true });
-    }
-  }, [user, isLoading, navigate]);
-
-  if (isLoading) {
-    return null; // Or a loading spinner if you prefer
-  }
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
