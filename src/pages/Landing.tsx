@@ -7,8 +7,11 @@ import {
   Heading,
   Text,
   VStack,
+  Flex,
 } from '@chakra-ui/react';
 import { FallingNotes } from '../components/FallingNotes';
+import { useAuth } from '../hooks/useAuth';
+import { useEffect } from 'react';
 
 const triggerCelebration = () => {
   confetti({
@@ -20,10 +23,32 @@ const triggerCelebration = () => {
 
 export const Landing = () => {
   const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate('/soundboard', { replace: true });
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return null; // Or a loading spinner if you prefer
+  }
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
       <FallingNotes />
+      <Flex justify="flex-end" p={4} position="relative" zIndex={2}>
+        <Button
+          variant="ghost"
+          colorScheme="green"
+          onClick={() => navigate('/login')}
+          _hover={{ transform: 'scale(1.05)' }}
+          transition="all 0.2s"
+        >
+          Login
+        </Button>
+      </Flex>
       <Container
         maxW="container.md"
         py={10}
