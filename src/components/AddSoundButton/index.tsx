@@ -41,7 +41,7 @@ export const AddSoundButton = ({
       >
         <Input
           type="file"
-          accept="audio/*"
+          accept=".mp3,.m4a,audio/mp3,audio/mp4,audio/x-m4a"
           onChange={onFileInputChange}
           id="file-upload"
           opacity={0}
