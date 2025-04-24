@@ -16,7 +16,7 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <AuthProvider>
-        <Router>
+        <Router basename="/">
           <Box width="100vw" minH="100vh" overflow="hidden">
             <Routes>
               <Route path="/" element={<Landing />} />
