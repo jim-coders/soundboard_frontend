@@ -48,6 +48,17 @@ const Login = () => {
           }}
         >
           <VStack spacing={6}>
+            <Link
+              as={RouterLink}
+              to="/"
+              color="whiteAlpha.700"
+              fontSize="sm"
+              _hover={{ color: 'brand.neonGreen' }}
+              transition="color 0.2s"
+              alignSelf="flex-start"
+            >
+              ← Back to Home
+            </Link>
             <Heading
               bgGradient="linear(to-r, brand.neonGreen, brand.neonBlue)"
               bgClip="text"
