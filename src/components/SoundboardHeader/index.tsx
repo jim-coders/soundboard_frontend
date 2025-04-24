@@ -6,6 +6,7 @@ import {
   Button,
 } from '@chakra-ui/react';
 import { QuestionIcon } from '@chakra-ui/icons';
+import { Link } from 'react-router-dom';
 
 interface SoundboardHeaderProps {
   username: string;
@@ -20,9 +21,17 @@ export const SoundboardHeader = ({
 }: SoundboardHeaderProps) => {
   return (
     <HStack width="100%" justify="space-between">
-      <Heading size="lg" color="white" letterSpacing="tight">
-        Soundbored
-      </Heading>
+      <Link to="/">
+        <Heading
+          size="lg"
+          color="white"
+          letterSpacing="tight"
+          _hover={{ color: 'brand.neonGreen' }}
+          transition="color 0.2s"
+        >
+          Soundbored
+        </Heading>
+      </Link>
       <HStack spacing={4}>
         <IconButton
           aria-label="Keyboard shortcuts"

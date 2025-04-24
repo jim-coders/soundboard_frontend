@@ -23,7 +23,16 @@ const triggerCelebration = () => {
 
 export const Landing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
@@ -31,17 +40,15 @@ export const Landing = () => {
       <Flex justify="flex-end" p={4} position="relative" zIndex={2}>
         <HStack spacing={4}>
           {user ? (
-            <>
-              <Button
-                variant="ghost"
-                colorScheme="green"
-                onClick={() => navigate('/soundboard')}
-                _hover={{ transform: 'scale(1.05)' }}
-                transition="all 0.2s"
-              >
-                Go to Soundboard
-              </Button>
-            </>
+            <Button
+              variant="ghost"
+              colorScheme="green"
+              onClick={handleLogout}
+              _hover={{ transform: 'scale(1.05)' }}
+              transition="all 0.2s"
+            >
+              Logout
+            </Button>
           ) : (
             <Button
               variant="ghost"
