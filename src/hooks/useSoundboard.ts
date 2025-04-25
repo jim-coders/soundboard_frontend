@@ -241,21 +241,8 @@ export const useSoundboard = () => {
 
   const playSound = async (sound: Sound) => {
     try {
-      let audio = audioCache.current.get(sound._id);
-
-      if (!audio) {
-        const url = await soundboard.getSoundUrl(sound._id);
-        audio = new Audio(url);
-        audioCache.current.set(sound._id, audio);
-      }
-
-      // Stop any currently playing sounds
-      audioCache.current.forEach((a) => {
-        if (a !== audio && !a.paused) {
-          a.pause();
-          a.currentTime = 0;
-        }
-      });
+      const url = await soundboard.getSoundUrl(sound._id);
+      const audio = new Audio(url);
 
       audio.onerror = (e) => {
         console.error('Audio error:', e);
